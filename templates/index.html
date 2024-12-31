@@ -1,5 +1,4 @@
 <html>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,26 +14,13 @@
     </div>
 </body>
 
-<script>
-    const imageUrls = {
-        // Player images
-        idleRight: "{{ url_for('static', filename='img/player/virtualboy_idleright.png') }}",
-        idleLeft: "{{ url_for('static', filename='img/player/virtualboy_idleleft.png') }}",
-        runRight: "{{ url_for('static', filename='img/player/virtualboy_runright.png') }}",
-        runLeft: "{{ url_for('static', filename='img/player/virtualboy_runleft.png') }}",
-        emergeFromPortal: "{{ url_for('static', filename='img/player/virtualboy_emerging.png') }}",
-        // Entrances and exit
-        doorOpening: "{{ url_for('static', filename='img/entrance/doorOpen.png') }}",
-        escape: "{{ url_for('static', filename='img/entrance/escape.png') }}"
-    };
-</script>
-
 <!-- For managing level fade out effects -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.1/gsap.min.js"
     integrity="sha512-Mf/xUqfWvDIr+1B6zfnIDIiG7XHzyP/guXUWgV6PgaQoIFeXkJQR5XWh9fqAiCiRCpemabt3naV4jhDWVnuYDQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <!-- All JS files -->
+<script type="module" src="{{ url_for('static', filename='js/data/imageUrls.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/classes/GameTracker.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/data/collisionConstants.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/data/mapConstants.js') }}"></script>

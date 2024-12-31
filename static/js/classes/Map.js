@@ -1,4 +1,5 @@
 import { Sprite } from "./Sprite.js";
+import { imageUrls } from "../data/imageUrls.js";
 import {
   homeWidth,
   homeHeight,
