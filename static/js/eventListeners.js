@@ -30,7 +30,7 @@ function handleInstructionsKeys(event) {
     gameModule.incrementCurrentScreen();
 
     // Handle pre-practice instruction screens
-    if (gameModule.isPrePracticePhase()) {
+    if (gameModule.isPrePracticePhase) {
       if (gameModule.currentScreen <= gameModule.prePracticeTotalScreens - 1) {
         gameModule.displayInstructions(); // Continue displaying pre-practice instructions
       } else {
