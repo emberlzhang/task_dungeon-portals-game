@@ -1,4 +1,5 @@
 import { homePosition } from "./mapConstants.js";
+import { imageUrls } from "./imageUrls.js";
 
 export const playerAttributes = {
   position: {

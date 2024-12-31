@@ -1,14 +1,6 @@
-import { Map } from "./classes/Map.js";
-import { Player } from "./classes/Player.js";
-import { Dashboard } from "./classes/Dashboard.js";
-import { GameTracker } from "./classes/GameTracker.js";
-import { playerAttributes } from "./data/playerConstants.js";
+// Import constants first
 import { homeWidth, homeHeight } from "./data/mapConstants.js";
-import {
-  bindEventListeners,
-  handleKeyDown,
-  handleKeyUp,
-} from "./eventListeners.js";
+import { playerAttributes } from "./data/playerConstants.js";
 
 // Setup game canvas
 export const canvas = document.querySelector("canvas");
@@ -17,26 +9,37 @@ canvas.width = homeWidth;
 canvas.height = homeHeight;
 export const overlay = { opacity: 0 };
 
+// Setup game state variables
+export let gameEnded = false;
+export let gameActive = false;
+export let gameSaved = false;
+export let currentMap;
+export let maps;
+export let level = 0;
+export let instructionsPhase = true;
+export let currentPracticeRound = 0;
+export let practiceMode = true;
+
+// Now import classes that depend on the above exports
+import { Map } from "./classes/Map.js";
+import { Player } from "./classes/Player.js";
+import { Dashboard } from "./classes/Dashboard.js";
+import { GameTracker } from "./classes/GameTracker.js";
+import {
+  bindEventListeners,
+  handleKeyDown,
+  handleKeyUp,
+} from "./eventListeners.js";
+
 // Setup start of game
 export const practiceRounds = 2; // Number of practice rounds
 export const totalRounds = 10; // Number of experiment rounds
 
-export let instructionsPhase = true;
-export let currentPracticeRound = 0; // Track the current practice round
-export let practiceMode = true; // Boolean to track if the game is in practice mode
+export let prePracticeTotalScreens = 4;
+export let totalScreens = 5; // total number of screens before real experiment
+export let isPrePracticePhase = true;
 
-export let level = 0; // start on home map, e.g. maps[0]
-export function setLevel(index) {
-  level = index;
-}
-let practiceMaps;
-let experimentMaps;
-export let maps;
-export let currentMap;
-
-let gameInitialized = false;
-let animationId;
-export let gameEnded = false;
+export let currentScreen = 0; // keeps track of instruction screen to display
 
 // Setup player, game dashboard
 export const player = new Player(playerAttributes);
@@ -58,14 +61,6 @@ export const inputField = {
 };
 
 // Setup tracking variables
-export let currentScreen = 0; // keeps track of instruction screen to display
-export let prePracticeTotalScreens = 4;
-export let totalScreens = 5; // total number of screens before real experiment
-export let isPrePracticePhase = true;
-
-export let gameActive = false; // false during instructions, true once game has started
-export let gameSaved = false;
-
 export let gameTracker = new GameTracker(); // GameTracker gets initialized once participant ID is collected
 export function setCurrentMap(map) {
   currentMap = map;
@@ -130,7 +125,7 @@ function initializeGame(
   practicePortalMap2
 ) {
   console.log("portal maps are loaded");
-  gameInitialized = true;
+  let gameInitialized = true;
   // Initialize game with the two portal maps
   let homeDisplay = new Map("home", "white");
   let dungeon1 = new Map("dungeon", "purple", portalMap1, 0);
@@ -150,8 +145,8 @@ function initializeGame(
     0
   );
 
-  practiceMaps = [homeDisplay, practiceDungeon1, practiceDungeon2]; // Add practice dungeons to maps
-  experimentMaps = [homeDisplay, dungeon1, dungeon2];
+  let practiceMaps = [homeDisplay, practiceDungeon1, practiceDungeon2]; // Add practice dungeons to maps
+  let experimentMaps = [homeDisplay, dungeon1, dungeon2];
 
   displayInstructions();
   bindEventListeners();
@@ -311,7 +306,7 @@ function animate() {
     return;
   }
   // this makes animate a recursive function
-  animationId = window.requestAnimationFrame(animate);
+  let animationId = window.requestAnimationFrame(animate);
 
   // Draw background
   c.fillStyle = "midnightblue";
@@ -353,6 +348,7 @@ function resetDoors() {
 
 export function endGame() {
   gameActive = false;
+  gameEnded = true;
   gameTracker.trackEvent("end_game");
   gameTracker.exportToCSV();
   gameSaved = true;
