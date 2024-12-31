@@ -1,9 +1,29 @@
-# Ignore the virtual environment directory
+# Ignore virtual environment directories
+venv/
 myproject_env/
+env/
+.env/
+.venv/
+ENV/
 
-# Ignore Python bytecode files
+# Python bytecode files
 *.pyc
 __pycache__/
+*.pyo
+*.pyd
+.Python
 
-# Ignore environment variable files
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db

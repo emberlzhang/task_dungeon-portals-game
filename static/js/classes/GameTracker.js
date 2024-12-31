@@ -1,97 +1,122 @@
 export class GameTracker {
-    constructor() {
-        this.participantId = "";
-        this.startTime = new Date(); // Capture the time when the application starts
-        this.currentLocation = "home"; // Start at home
-        this.currentRound = 1; // Default starting round
-        this.points = 0;
-        this.pointLoss = 0;
-        this.dungeonPortalMap = {};
-        this.portalEntered = 0;
-        this.portalExited = 0;
-        this.events = [];
-    }
+  constructor() {
+    this.participantId = "";
+    this.startTime = new Date("2024-12-31T15:06:00-05:00"); // Use provided time as start
+    this.currentLocation = "home"; // Start at home
+    this.currentRound = 1; // Default starting round
+    this.points = 0;
+    this.pointLoss = 0;
+    this.dungeonPortalMap = {};
+    this.portalEntered = 0;
+    this.portalExited = 0;
+    this.events = [];
 
+    // Add event listener for when user leaves/closes the page
+    window.addEventListener("beforeunload", () => {
+      this.exportToCSV();
+    });
+  }
 
-    trackInstructionScreen(screenNumber) {
-        this.trackEvent(`instruction_screen_${screenNumber}`);
-    }
-    
-    trackGameStart() {
-        this.trackEvent('start_game');
-    }
+  trackInstructionScreen(screenNumber) {
+    this.trackEvent(`instruction_screen_${screenNumber}`);
+  }
 
-    trackRoundStart(round) {
-        this.currentLocation = "home";
-        this.currentRound = round;
-        this.pointLoss = 0;
-        this.trackEvent('start_round')
-    }
+  trackRoundStart(round) {
+    this.currentLocation = "home";
+    this.currentRound = round;
+    this.pointLoss = 0;
+    this.trackEvent("start_round");
+  }
 
-    trackDungeonEntry(dungeon) {
-        this.currentLocation = "dungeon"; 
-        this.pointLoss = dungeon.pointLoss;
-        this.dungeonPortalMap = dungeon.portalMap;
-        this.trackEvent('start_dungeon')
-    }
+  trackDungeonEntry(dungeon) {
+    this.currentLocation = "dungeon";
+    this.pointLoss = dungeon.pointLoss;
+    this.dungeonPortalMap = dungeon.portalMap;
+    this.trackEvent("start_dungeon");
+  }
 
-    trackPortalTravel(portalEntered, portalExited, points) {
-        this.portalEntered = portalEntered;
-        this.portalExited = portalExited;
-        this.points = points;
-        this.trackEvent('portal_travel');
-    }
+  trackPortalTravel(portalEntered, portalExited, points) {
+    this.portalEntered = portalEntered;
+    this.portalExited = portalExited;
+    this.points = points;
+    this.trackEvent("portal_travel");
+  }
 
-    trackEvent(eventType) {
-        const timestamp = new Date().toISOString();
-        const eventData = {
-            participantId: this.participantId,
-            startTime: this.startTime.toISOString(), // start time of entire experiment
-            eventType: eventType,
-            timestamp: timestamp, // time of the event
-            round: this.currentRound,
-            location: this.currentLocation,
-            dungeonPortalMap: this.dungeonPortalMap ? this.dungeonPortalMap : "",
-            dungeonPointLoss: this.pointLoss,
-            portalEntered: this.portalEntered ? this.portalEntered : "",
-            portalExited: this.portalExited ? this.portalExited : "",
-            points: this.points
-        };
-        this.events.push(eventData);
-    }
+  trackEvent(eventType) {
+    const currentTime = new Date("2024-12-31T15:06:00-05:00"); // Use provided time
+    const relativeTimeMs = currentTime - this.startTime; // Time since game start in ms
+    const relativeTimeSec = Math.floor(relativeTimeMs / 1000); // Convert to seconds
 
-    
-    exportToCSV() {
-        console.log("starting export to CSV")
-        const headers = "participantId,startTime,round,dungeon,event_type,timestamp,enteredPortal,dungeonPortalMap\n";
-        const rows = this.events.map(event => [
-            event.participantId,
-            event.startTime,
-            event.round,
-            event.dungeon,
-            event.event_type,
-            event.timestamp,
-            event.enteredPortal,
-            event.dungeonPortalMap
-        ].join(",")).join("\n");
+    const eventData = {
+      participantId: this.participantId,
+      eventType: eventType,
+      absoluteTimestamp: currentTime.toISOString(),
+      relativeTimeSec: relativeTimeSec,
+      round: this.currentRound,
+      location: this.currentLocation,
+      dungeonPortalMap: JSON.stringify(this.dungeonPortalMap),
+      dungeonPointLoss: this.pointLoss,
+      portalEntered: this.portalEntered,
+      portalExited: this.portalExited,
+      totalPoints: this.points,
+    };
+    this.events.push(eventData);
+  }
 
-        const csvContent = headers + rows;
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `game_data_${this.participantId}.csv`);
-        document.body.appendChild(link); // Required for Firefox
-        link.click();
-        document.body.removeChild(link);
-    }
+  exportToCSV() {
+    const headers =
+      [
+        "participantId",
+        "eventType",
+        "absoluteTimestamp",
+        "relativeTimeSec",
+        "round",
+        "location",
+        "dungeonPortalMap",
+        "dungeonPointLoss",
+        "portalEntered",
+        "portalExited",
+        "totalPoints",
+      ].join(",") + "\n";
 
-    
-    saveToDatabase() {
-        console.log("starting save to database")
-    }
+    const rows = this.events
+      .map((event) =>
+        [
+          event.participantId,
+          event.eventType,
+          event.absoluteTimestamp,
+          event.relativeTimeSec,
+          event.round,
+          event.location,
+          event.dungeonPortalMap,
+          event.dungeonPointLoss,
+          event.portalEntered,
+          event.portalExited,
+          event.totalPoints,
+        ].join(",")
+      )
+      .join("\n");
+
+    const csvContent = headers + rows;
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `dungeon_game_data_${new Date().toISOString().split("T")[0]}_${
+        this.participantId
+      }.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  saveToDatabase() {
+    console.log("starting save to database");
+  }
 }
-
 
 // class GameTracker {
 //     constructor(participantId) {
@@ -118,7 +143,6 @@ export class GameTracker {
 //             enteredAt: new Date(),
 //         };
 //     }
-
 
 //     async trackRound(round) {
 //         // Create a new round in the database and return the round ID
@@ -165,14 +189,12 @@ export class GameTracker {
 //             console.error('Error:', error);
 //         }
 //     }
-    
+
 //     async exportToCSV() {
 
 //     }
 
 // }
-
-
 
 // class GameTracker {
 //     constructor(userId) {
