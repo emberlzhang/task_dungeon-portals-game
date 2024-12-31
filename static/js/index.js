@@ -36,6 +36,7 @@ export let currentMap;
 
 let gameInitialized = false;
 let animationId;
+export let gameEnded = false;
 
 // Setup player, game dashboard
 export const player = new Player(playerAttributes);
