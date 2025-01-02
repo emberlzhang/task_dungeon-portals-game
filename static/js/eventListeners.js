@@ -127,7 +127,7 @@ function handleGameKeyDown(event) {
             gameModule.displayInstructions(); // Go to transition screen before real game
           }
           if (
-            practiceMode &&
+            gameModule.practiceMode &&
             gameModule.dashboard.round > gameModule.practiceRounds
           ) {
             gameModule.endGame();

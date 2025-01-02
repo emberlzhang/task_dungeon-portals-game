@@ -19,6 +19,10 @@ export let level = 0;
 export let instructionsPhase = true;
 export let currentPracticeRound = 0;
 export let practiceMode = true;
+export let practiceMaps = [];
+export let experimentMaps = [];
+let gameInitialized = false;
+let animationId;
 
 // Now import classes that depend on the above exports
 import { Map } from "./classes/Map.js";
@@ -62,9 +66,15 @@ export const inputField = {
 
 // Setup tracking variables
 export let gameTracker = new GameTracker(); // GameTracker gets initialized once participant ID is collected
+
+export function setLevel(index) {
+  level = index;
+}
+
 export function setCurrentMap(map) {
   currentMap = map;
 }
+
 export function setGameActive(bool) {
   gameActive = bool;
   if (bool) {
@@ -75,6 +85,7 @@ export function setGameActive(bool) {
     }
   }
 }
+
 export function incrementCurrentScreen() {
   currentScreen++;
 }
@@ -124,14 +135,12 @@ function initializeGame(
   practicePortalMap1,
   practicePortalMap2
 ) {
-  console.log("portal maps are loaded");
-  let gameInitialized = true;
-  // Initialize game with the two portal maps
+  console.log("portal maps are starting to load...");
+
+  // Initialize game with the two portal maps for real and practice games
   let homeDisplay = new Map("home", "white");
   let dungeon1 = new Map("dungeon", "purple", portalMap1, 0);
   let dungeon2 = new Map("dungeon", "teal", portalMap2, 50);
-
-  // Initialize practice maps
   let practiceDungeon1 = new Map(
     "practiceDungeon",
     "lightblue",
@@ -140,16 +149,18 @@ function initializeGame(
   );
   let practiceDungeon2 = new Map(
     "practiceDungeon",
-    "lightgreen",
+    "green",
     practicePortalMap2,
     0
   );
 
-  let practiceMaps = [homeDisplay, practiceDungeon1, practiceDungeon2]; // Add practice dungeons to maps
-  let experimentMaps = [homeDisplay, dungeon1, dungeon2];
+  practiceMaps = [homeDisplay, practiceDungeon1, practiceDungeon2];
+  experimentMaps = [homeDisplay, dungeon1, dungeon2];
 
   displayInstructions();
   bindEventListeners();
+  console.log("portal maps are done loading");
+  gameInitialized = true;
   gameTracker.trackEvent("start_game");
 }
 
@@ -272,10 +283,15 @@ export function drawParticipantIDField() {
 
 export function startPractice() {
   console.log("Starting practice");
+  if (!practiceMaps || practiceMaps.length === 0) {
+    console.error("Practice maps not initialized!");
+    return;
+  }
+  console.log("Practice maps:", practiceMaps);
   practiceMode = true;
-  gameActive = true;
+  gameActive = true; // Set this before animate
   maps = practiceMaps;
-  currentMap = maps[0];
+  currentMap = maps[0]; // Start with home map
   currentMap.init();
   animate();
 }
@@ -284,9 +300,9 @@ export function startPractice() {
 export function startGame() {
   if (gameInitialized && gameActive) {
     console.log("Starting experiment");
-    gameActive = true;
     practiceMode = false;
     maps = experimentMaps;
+    gameActive = true;
     currentMap = maps[0]; // Start on the home map
     currentMap.init();
     animate();
@@ -302,17 +318,21 @@ export function startGame() {
 // Updates and animates the game frame by frame
 function animate() {
   if (!gameActive) {
+    console.log("Game not active, canceling animation");
     cancelAnimationFrame(animationId);
     return;
   }
-  // this makes animate a recursive function
-  let animationId = window.requestAnimationFrame(animate);
+  animationId = window.requestAnimationFrame(animate);
 
   // Draw background
   c.fillStyle = "midnightblue";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
   // Draw walls, doors, and collision blocks
+  if (!currentMap) {
+    console.error("No current map!");
+    return;
+  }
   currentMap.draw();
 
   // Draw dashboard
@@ -346,6 +366,9 @@ function resetDoors() {
   }
 }
 
+export function transitionToRealGame() {
+  gameActive = false;
+}
 export function endGame() {
   gameActive = false;
   gameEnded = true;
