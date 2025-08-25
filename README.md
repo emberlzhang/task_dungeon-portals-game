@@ -106,3 +106,9 @@ If deployment fails, check:
 - Render’s **logs** for errors.
 - The correct **host and port binding** in `app.py`.
 - That **all dependencies** are listed in `requirements.txt`.
+
+## Contributing:
+
+### Submit a pull request
+
+If you'd like to contribute, please fork the repository and open a pull request to the `main` branch.
